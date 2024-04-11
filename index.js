@@ -51,9 +51,6 @@ const deploy = (funcName, dir, region) => {
   })
 }
 
-
-
-
 yargs(hideBin(process.argv))
   .command(
     ['lambda', 'l'], 
