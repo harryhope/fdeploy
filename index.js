@@ -1,17 +1,20 @@
-const aws = require('aws-sdk')
-const ora = require('ora')
-const chalk = require('chalk')
+#!/usr/bin/env node
+const { Lambda } = require('@aws-sdk/client-lambda')
 const AdmZip = require('adm-zip')
 const dotenv = require('dotenv')
 const path = require('path')
+const yargs = require('yargs/yargs')
+const { hideBin } = require('yargs/helpers')
 
-const deploy = (funcName, dir, region) => {
+const deploy = async (funcName, dir, region) => {
   const folder = path.resolve(dir || process.cwd())
   const envPath = path.resolve(dir || process.cwd(), '.env')
 
   dotenv.config({ path: envPath })
   
-  const spinner = ora('Zipping folder').start()
+  const ora = await import('ora')
+  const chalk = (await import ('chalk')).default
+  const spinner = ora.default('Zipping folder').start()
   
   if (!funcName || !folder) {
     throw new Error('You must provide the function name and folder to zip')
@@ -22,11 +25,12 @@ const deploy = (funcName, dir, region) => {
   
   zip.toBuffer(buffer => {
     spinner.text = 'Uploading to Lambda'
-    const lambda = new aws.Lambda({
+    const lambda = new Lambda({
       region,
-      apiVersion: '2015-03-31',
-      accessKeyId: process.env.ACCESS_KEY_ID,
-      secretAccessKey: process.env.SECRET_ACCESS_KEY
+      credentials: {
+        accessKeyId: process.env.ACCESS_KEY_ID,
+        secretAccessKey: process.env.SECRET_ACCESS_KEY
+      }
     })
     
     const params = {
