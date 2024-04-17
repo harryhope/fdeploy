@@ -10,7 +10,7 @@
     "fdeploy": "./index.js"
   },
   "author": "Harry Hope",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "dependencies": {
     "@aws-sdk/client-lambda": "^3.554.0",
     "adm-zip": "^0.5.12",
