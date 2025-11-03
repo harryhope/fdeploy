@@ -6,11 +6,13 @@ const path = require('path')
 const yargs = require('yargs/yargs')
 const { hideBin } = require('yargs/helpers')
 
-const deploy = async (funcName, dir, region) => {
+const deploy = async (funcName, dir, region, envPath) => {
   const folder = path.resolve(dir || process.cwd())
-  const envPath = path.resolve(dir || process.cwd(), '.env')
+  const envFilePath = envPath 
+    ? path.resolve(envPath) 
+    : path.resolve(process.cwd(), '.env')
 
-  dotenv.config({ path: envPath })
+  dotenv.config({ path: envFilePath })
   
   const ora = await import('ora')
   const chalk = (await import ('chalk')).default
@@ -72,9 +74,13 @@ yargs(hideBin(process.argv))
         alias: 'r',
         describe: 'The AWS region to deploy the lambda to',
         default: 'us-east-1'
+      },
+      envPath: {
+        alias: 'e',
+        describe: 'The path to the .env file'
       }
     },
-    argv => { deploy(argv.name, argv.directory, argv.region)}
+    argv => { deploy(argv.name, argv.directory, argv.region, argv.envPath)}
   )
   .help()
   .demandCommand(1, 'Enter a command from the list above')
