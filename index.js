@@ -6,6 +6,31 @@ const path = require('path')
 const yargs = require('yargs/yargs')
 const { hideBin } = require('yargs/helpers')
 
+const maskValue = (value) => {
+  if (!value || value.length <= 8) {
+    return value
+  }
+  const first4 = value.slice(0, 4)
+  const last4 = value.slice(-4)
+  const masked = 'x'.repeat(value.length - 8)
+  return `${first4}${masked}${last4}`
+}
+
+const maskEnvironmentVariables = (data) => {
+  if (!data?.Environment?.Variables) {
+    return data
+  }
+  
+  const maskedData = JSON.parse(JSON.stringify(data))
+  const variables = maskedData.Environment.Variables
+  
+  for (const key in variables) {
+    variables[key] = maskValue(variables[key])
+  }
+  
+  return maskedData
+}
+
 const deploy = async (funcName, dir, region, envPath) => {
   const folder = path.resolve(dir || process.cwd())
   const envFilePath = envPath 
@@ -48,7 +73,7 @@ const deploy = async (funcName, dir, region, envPath) => {
         console.log()
         console.log(chalk.bgRed.bold(`Failed to deploy ${funcName}`))
       } else {
-        console.log(data)
+        console.log(maskEnvironmentVariables(data))
         console.log()
         console.log(chalk.bgGreen.bold(`${funcName} deployed successfully`))
         console.log()
